@@ -1,5 +1,4 @@
 from collections import UserDict
-from modules import except_detect_decorator
 
 
 class Field:
@@ -32,7 +31,7 @@ class Phone(Field):
         магичний метот, який перевіряє значення на корректність
         Якщо значення корректне, воно присвоюється атрибуту, якщо ні - викидається виключення ValueError
         """
-        if type(new_val) != str or len(new_val) != 10 or any(not d.isdigit() for d in new_val):
+        if type(new_val) != str or len(new_val) != 10 or not new_val.isdigit():
             raise ValueError('Введіть корректний номер телефона. Повинно бути 10 цифр')
         object.__setattr__(self, value, new_val)
 
@@ -56,7 +55,6 @@ class Record:
         """
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
     
-    @except_detect_decorator
     def add_phone(self, phone: str) -> None:
         """
         метод для додавання - add_phone .
@@ -64,17 +62,14 @@ class Record:
         """
         self.phones.append(Phone(phone))
 
-    @except_detect_decorator
     def remove_phone(self, phone: str) -> None:
         """
         метод для видалення - remove_phone. 
         На вхід подається рядок, який містить номер телефона.
         """
-        phone = Phone(phone)
-        for i, ph_obj in enumerate(self.phones):
-            if phone.value == ph_obj.value:
-                del self.phones[i]
-                break
+        phone_obj = self.find_phone(phone)
+        if phone_obj is not None: self.phones.remove(phone_obj)
+
    
 
     def edit_phone(self, old_phone: str, new_phone: str) -> None:
@@ -83,12 +78,12 @@ class Record:
         На вхід подається два аргумента - рядки, які містять старий номер телефона та новий. 
         У разі некоректності вхідних даних метод має завершуватись помилкою ValueError.
         """
-        old_phone = Phone(old_phone)
-        new_phone = Phone(new_phone)
-        for i, phone in enumerate(self.phones):
-            if old_phone.value == phone.value: self.phones[i] = new_phone
+        if self.find_phone(old_phone) is not None:
+            self.remove_phone(old_phone)
+            self.add_phone(new_phone)
+        else:
+            raise ValueError ("Номера, який ви хочете відредагувати не існує")
 
-    @except_detect_decorator
     def find_phone(self, phone: str)-> Phone|None:
         """
         find_phone - метод пошуку номеру телефона
@@ -151,7 +146,7 @@ if __name__ == '__main__':
     john = book.find("John")
     john.edit_phone("1234567890", "1112444333")
     print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
-    john.remove_phone("1112244333")
+    john.remove_phone("1112444333")
 
     print(john)  # Виведення: Contact name: John, phones: 5555555555
 
@@ -161,3 +156,4 @@ if __name__ == '__main__':
 
     # Видалення запису Jane
     book.delete("Jane")
+    print(book)
