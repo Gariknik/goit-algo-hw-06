@@ -26,14 +26,23 @@ class Phone(Field):
     Реалізовано валідацію номера телефону (має бути перевірка на 10 цифр).
     Наслідує клас Field. Значення зберігaється в полі value .
     """
-    def __setattr__(self, value, new_val):
+    
+    def __init__(self, value):
         """
-        магичний метот, який перевіряє значення на корректність
-        Якщо значення корректне, воно присвоюється атрибуту, якщо ні - викидається виключення ValueError
+        конструктор класу Record
         """
-        if type(new_val) != str or len(new_val) != 10 or not new_val.isdigit():
+        if type(value) != str or len(value) != 10 or not value.isdigit():
             raise ValueError('Введіть корректний номер телефона. Повинно бути 10 цифр')
-        object.__setattr__(self, value, new_val)
+        super().__init__(value)
+
+    # def __setattr__(self, value, new_val):
+    #     """
+    #     магичний метот, який перевіряє значення на корректність
+    #     Якщо значення корректне, воно присвоюється атрибуту, якщо ні - викидається виключення ValueError
+    #     """
+    #     if type(new_val) != str or len(new_val) != 10 or not new_val.isdigit():
+    #         raise ValueError('Введіть корректний номер телефона. Повинно бути 10 цифр')
+    #     object.__setattr__(self, value, new_val)
 
                 
 class Record:
@@ -49,11 +58,13 @@ class Record:
         self.name = Name(name)
         self.phones = []
 
+
     def __str__(self):
         """
         Магичний метод для відображення об'єкту класа Record
         """
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+   
     
     def add_phone(self, phone: str) -> None:
         """
@@ -62,15 +73,16 @@ class Record:
         """
         self.phones.append(Phone(phone))
 
+
     def remove_phone(self, phone: str) -> None:
         """
         метод для видалення - remove_phone. 
         На вхід подається рядок, який містить номер телефона.
         """
         phone_obj = self.find_phone(phone)
-        if phone_obj is not None: self.phones.remove(phone_obj)
+        if phone_obj is not None: 
+            self.phones.remove(phone_obj)
 
-   
 
     def edit_phone(self, old_phone: str, new_phone: str) -> None:
         """
@@ -78,11 +90,11 @@ class Record:
         На вхід подається два аргумента - рядки, які містять старий номер телефона та новий. 
         У разі некоректності вхідних даних метод має завершуватись помилкою ValueError.
         """
-        if self.find_phone(old_phone) is not None:
-            self.remove_phone(old_phone)
-            self.add_phone(new_phone)
-        else:
-            raise ValueError ("Номера, який ви хочете відредагувати не існує")
+        if self.find_phone(old_phone) is None:
+            raise ValueError ("Номера, який ви хочете відредагувати, не існує")
+        self.remove_phone(old_phone)
+        self.add_phone(new_phone)
+            
 
     def find_phone(self, phone: str)-> Phone|None:
         """
@@ -129,6 +141,7 @@ if __name__ == '__main__':
     john_record = Record("John")
     john_record.add_phone("1234567890")
     john_record.add_phone("5555555555")
+    john_record.add_phone("5553435555")
 
     # Додавання запису John до адресної книги
     book.add_record(john_record)
@@ -146,14 +159,12 @@ if __name__ == '__main__':
     john = book.find("John")
     john.edit_phone("1234567890", "1112444333")
     print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
-    john.remove_phone("1112444333")
-
+    
+    john.edit_phone("5553435555", "1132222223")
     print(john)  # Виведення: Contact name: John, phones: 5555555555
-
+    john.remove_phone("1112444333")
     # Пошук конкретного телефону у записі John
     found_phone = john.find_phone("5555555555")
     print(f"{john.name}: {found_phone}")  # Виведення: John: 5555555555
 
-    # Видалення запису Jane
-    book.delete("Jane")
     print(book)
