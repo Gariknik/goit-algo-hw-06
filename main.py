@@ -27,22 +27,22 @@ class Phone(Field):
     Наслідує клас Field. Значення зберігaється в полі value .
     """
     
-    def __init__(self, value):
-        """
-        конструктор класу Record
-        """
-        if type(value) != str or len(value) != 10 or not value.isdigit():
-            raise ValueError('Введіть корректний номер телефона. Повинно бути 10 цифр')
-        super().__init__(value)
-
-    # def __setattr__(self, value, new_val):
+    # def __init__(self, value):
     #     """
-    #     магичний метот, який перевіряє значення на корректність
-    #     Якщо значення корректне, воно присвоюється атрибуту, якщо ні - викидається виключення ValueError
+    #     конструктор класу Record
     #     """
-    #     if type(new_val) != str or len(new_val) != 10 or not new_val.isdigit():
+    #     if type(value) != str or len(value) != 10 or not value.isdigit():
     #         raise ValueError('Введіть корректний номер телефона. Повинно бути 10 цифр')
-    #     object.__setattr__(self, value, new_val)
+    #     super().__init__(value)
+
+    def __setattr__(self, value, new_val):
+        """
+        магичний метот, який перевіряє значення на корректність
+        Якщо значення корректне, воно присвоюється атрибуту, якщо ні - викидається виключення ValueError
+        """
+        if type(new_val) != str or len(new_val) != 10 or not new_val.isdigit():
+            raise ValueError('Введіть корректний номер телефона. Повинно бути 10 цифр')
+        object.__setattr__(self, value, new_val)
 
                 
 class Record:
@@ -92,8 +92,9 @@ class Record:
         """
         if self.find_phone(old_phone) is None:
             raise ValueError ("Номера, який ви хочете відредагувати, не існує")
-        self.remove_phone(old_phone)
         self.add_phone(new_phone)
+        self.remove_phone(old_phone)
+        
             
 
     def find_phone(self, phone: str)-> Phone|None:
@@ -134,37 +135,12 @@ class AddressBook(UserDict):
 
 
 if __name__ == '__main__':
-    # Створення нової адресної книги
-    book = AddressBook()
-
-    # Створення запису для John
-    john_record = Record("John")
-    john_record.add_phone("1234567890")
-    john_record.add_phone("5555555555")
-    john_record.add_phone("5553435555")
-
-    # Додавання запису John до адресної книги
-    book.add_record(john_record)
-
-    # Створення та додавання нового запису для Jane
-    jane_record = Record("Jane")
-    jane_record.add_phone("9876543260")
-    book.add_record(jane_record)
-
-    # Виведення всіх записів у книзі
-        
-    print(book)
-
-    # Знаходження та редагування телефону для John
-    john = book.find("John")
-    john.edit_phone("1234567890", "1112444333")
-    print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
-    
-    john.edit_phone("5553435555", "1132222223")
-    print(john)  # Виведення: Contact name: John, phones: 5555555555
-    john.remove_phone("1112444333")
-    # Пошук конкретного телефону у записі John
-    found_phone = john.find_phone("5555555555")
-    print(f"{john.name}: {found_phone}")  # Виведення: John: 5555555555
-
-    print(book)
+    ab = AddressBook()
+    rec = Record('vova')
+    rec.add_phone('1231231231')
+    ab.add_record(rec)
+    print(ab)
+    rec.add_phone('2342342342')
+    print(ab)
+    rec.edit_phone('2342342342', '23')
+    print(ab)
